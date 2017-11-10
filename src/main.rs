@@ -3,9 +3,9 @@ extern crate serde_yaml;
 extern crate clap;
 
 use std::io::prelude::*;
+use std::io;
 use std::fs::File;
 use clap::{Arg, App};
-use serde_json::{Error};
 
 fn main() {
     let matches = App::new("J 2 Y")
@@ -29,26 +29,26 @@ fn main() {
     let input_file = matches.value_of("INPUT").unwrap();
     let output_file = matches.value_of("OUTPUT").unwrap();
 
-    let contents = read_json_content(input_file, verbose);
+    let contents = read_json_content(input_file, verbose).expect("Unable to read the file");
     let output_content = convert_json_to_yaml(&contents, verbose).expect("Unable to convert the json to yaml.");
-    write_yaml_content(output_file, output_content, verbose);
+    write_yaml_content(output_file, output_content, verbose).expect("Failed to write the output file");
 }
 
-fn read_json_content(file_path: &str, verbose: bool) -> String {
+fn read_json_content(file_path: &str, verbose: bool) -> Result<String, io::Error> {
     if verbose {
         println!("Reading: {} \n", file_path);
     }
-    let mut file = File::open(file_path).expect("Cannot open the file");
+    let mut file = File::open(file_path)?;
     let mut contents = String::new();
-    file.read_to_string(&mut contents).expect("Unable to read the file");
+    file.read_to_string(&mut contents)?;
     if verbose {
         println!("Read content: \n");
         println!("{}", &contents);
     }
-    contents
+    Ok(contents)
 }
 
-fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, Error> {
+fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, serde_json::Error> {
 
     // Parse the string of json data into serde_yaml::Value.
     let v: serde_yaml::Value = serde_json::from_str(json_str)?;
@@ -62,10 +62,10 @@ fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, Error> 
     Ok(yaml_string)
 }
 
-fn write_yaml_content(file_path: &str, output_content: String, verbose: bool) {
+fn write_yaml_content(file_path: &str, output_content: String, verbose: bool) -> io::Result<()> {
     if verbose {
         println!("\nWriting: {} \n", file_path);
     }
     let mut file = File::create(file_path).expect("Failed to create the output file.");
-    file.write_all(output_content.into_bytes().as_ref()).expect("Failed to write the yaml document.");
+    file.write_all(output_content.into_bytes().as_ref())
 }
