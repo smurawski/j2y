@@ -1,71 +1,52 @@
-extern crate serde_json;
-extern crate serde_yaml;
+#[macro_use]
 extern crate clap;
+mod converter;
 
-use std::io::prelude::*;
-use std::io;
-use std::fs::File;
+use converter::{read_json_content, convert_json_to_yaml, convert_yaml_to_json, write_yaml_content};
+
 use clap::{Arg, App};
+
+arg_enum!{
+    #[derive(Debug)]
+    enum SourceFormat {
+        YAML,
+        JSON
+    }
+}
 
 fn main() {
     let matches = App::new("J 2 Y")
-                          .version("0.0.1")
-                          .author("Steven Murawski <steven.murawski@microsoft.com>")
-                          .about("Converts JSON to YAML")
-                          .arg(Arg::with_name("INPUT")
-                               .help("Sets the input file to use (should be JSON)")
-                               .required(true)
-                               .index(1))
-                          .arg(Arg::with_name("OUTPUT")
-                               .help("Sets the output file to use (will be YAML)")
-                               .required(true)
-                               .index(2))
-                          .arg(Arg::with_name("verbose")
-                               .short("v")
-                               .help("Include verbose output"))
-                          .get_matches();
+                        .version("0.0.2")
+                        .author("Steven Murawski <steven.murawski@microsoft.com>")
+                        .about("Converts JSON between YAML")
+                        .arg(Arg::with_name("INPUT")
+                            .help("Sets the input file to use")
+                            .required(true)
+                            .index(1))
+                        .arg(Arg::with_name("OUTPUT")
+                            .help("Sets the output file to use")
+                            .required(true)
+                            .index(2))
+                        .arg(Arg::with_name("SourceFormat")
+                            .long("source")
+                            .short("s")
+                            .help("Input serialization format.")
+                            .default_value("JSON")
+                            .possible_values(&SourceFormat::variants()))
+                        .arg(Arg::with_name("verbose")
+                            .short("v")
+                            .help("Include verbose output"))
+                        .get_matches();
 
     let verbose = matches.is_present("verbose");
     let input_file = matches.value_of("INPUT").unwrap();
     let output_file = matches.value_of("OUTPUT").unwrap();
+    let source_format = value_t!(matches.value_of("SourceFormat"), SourceFormat).unwrap_or_else(|e| e.exit());
 
     let contents = read_json_content(input_file, verbose).expect("Unable to read the file");
-    let output_content = convert_json_to_yaml(&contents, verbose).expect("Unable to convert the json to yaml.");
+    let output_content = match source_format {
+        SourceFormat::YAML => convert_yaml_to_json(&contents, verbose).expect("Unable to convert the yaml to json."),
+        SourceFormat::JSON => convert_json_to_yaml(&contents, verbose).expect("Unable to convert the json to yaml."),
+    };
     write_yaml_content(output_file, output_content, verbose).expect("Failed to write the output file");
-}
-
-fn read_json_content(file_path: &str, verbose: bool) -> Result<String, io::Error> {
-    if verbose {
-        println!("Reading: {} \n", file_path);
-    }
-    let mut file = File::open(file_path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    if verbose {
-        println!("Read content: \n");
-        println!("{}", &contents);
-    }
-    Ok(contents)
-}
-
-fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, serde_json::Error> {
-
-    // Parse the string of json data into serde_yaml::Value.
-    let v: serde_yaml::Value = serde_json::from_str(json_str)?;
-    let yaml_string = serde_yaml::to_string(&v).expect("Failed to convert the YAML to a string.");
-
-    if verbose {
-        println!("\nAfter YAML conversion: \n");
-        println!("{}", &yaml_string);
-    }
-    
-    Ok(yaml_string)
-}
-
-fn write_yaml_content(file_path: &str, output_content: String, verbose: bool) -> io::Result<()> {
-    if verbose {
-        println!("\nWriting: {} \n", file_path);
-    }
-    let mut file = File::create(file_path).expect("Failed to create the output file.");
-    file.write_all(output_content.into_bytes().as_ref())
 }

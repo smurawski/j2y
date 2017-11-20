@@ -1,0 +1,169 @@
+---
+
+phases:
+- phase: Windows
+  queue: Hosted VS2017
+  steps: 
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: Check Format
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PowerShell3
+      task: 
+        id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        scriptType: filePath
+        scriptName: ./build.ps1
+        arguments: "-Format"
+        workingFolder: ""
+        inlineScript: "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\""
+        failOnStandardError: "false"
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: Run Tests
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PowerShell1
+      task: 
+        id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        scriptType: filePath
+        scriptName: ./build.ps1
+        arguments: "-Test"
+        workingFolder: ""
+        inlineScript: "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\""
+        failOnStandardError: "false"
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: Build
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PowerShell2
+      task: 
+        id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        scriptType: filePath
+        scriptName: ./build.ps1
+        arguments: "-Build -Release"
+        workingFolder: ""
+        inlineScript: "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\""
+        failOnStandardError: "false"
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: "Publish Artifact: Release Build"
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PublishBuildArtifacts4
+      task: 
+        id: "2ff763a7-ce83-4e1f-bc89-0ae63477cebe"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        PathtoPublish: ./target/release/
+        ArtifactName: drop
+        ArtifactType: Container
+        TargetPath: "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
+        Parallel: "false"
+        ParallelCount: "8"
+- phase: Linux
+  queue: Hosted Linux Preview
+  steps: 
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: Check Format
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PowerShell3
+      task: 
+        id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        scriptType: filePath
+        scriptName: ./build.ps1
+        arguments: "-Format"
+        workingFolder: ""
+        inlineScript: "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\""
+        failOnStandardError: "false"
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: Run Tests
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PowerShell1
+      task: 
+        id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        scriptType: filePath
+        scriptName: ./build.ps1
+        arguments: "-Test"
+        workingFolder: ""
+        inlineScript: "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\""
+        failOnStandardError: "false"
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: Build
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PowerShell2
+      task: 
+        id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        scriptType: filePath
+        scriptName: ./build.ps1
+        arguments: "-Build -Release"
+        workingFolder: ""
+        inlineScript: "# You can write your powershell scripts inline here. \n# You can also pass predefined and custom variables to this scripts using arguments\n\n Write-Host \"Hello World\""
+        failOnStandardError: "false"
+    - 
+      environment: {}
+      enabled: true
+      continueOnError: false
+      alwaysRun: false
+      displayName: "Publish Artifact: Release Build"
+      timeoutInMinutes: 0
+      condition: succeeded()
+      refName: PublishBuildArtifacts4
+      task: 
+        id: "2ff763a7-ce83-4e1f-bc89-0ae63477cebe"
+        versionSpec: "1.*"
+        definitionType: task
+      inputs: 
+        PathtoPublish: ./target/release/
+        ArtifactName: drop
+        ArtifactType: Container
+        TargetPath: "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
+        Parallel: "false"
+        ParallelCount: "8"
