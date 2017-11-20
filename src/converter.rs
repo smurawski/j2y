@@ -29,7 +29,7 @@ pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, ser
         println!("\nAfter YAML conversion: \n");
         println!("{}", &yaml_string);
     }
-    
+
     Ok(yaml_string)
 }
 
@@ -43,11 +43,15 @@ pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, ser
         println!("\nAfter YAML conversion: \n");
         println!("{}", &json_string);
     }
-    
+
     Ok(json_string)
 }
 
-pub fn write_yaml_content(file_path: &str, output_content: String, verbose: bool) -> io::Result<()> {
+pub fn write_yaml_content(
+    file_path: &str,
+    output_content: String,
+    verbose: bool,
+) -> io::Result<()> {
     if verbose {
         println!("\nWriting: {} \n", file_path);
     }
@@ -61,7 +65,7 @@ mod tests {
 
     #[test]
     fn simple_valid_json_to_yaml() {
-        let data = r#"{     
+        let data = r#"{
                     "environment": {},
                     "enabled": true,
                     "continueOnError": false,
@@ -90,7 +94,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn invalid_json_to_yaml() {
-        let data = r#"{     
+        let data = r#"{
                     "environment": {},
                     "enabled": true,
                     "continueOnError": false,
@@ -127,11 +131,11 @@ mod tests {
             timeoutInMinutes: 0
             condition: succeeded()
             refName: PowerShell1
-            task: 
+            task:
                 id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
                 versionSpec: "1.*"
                 definitionType: task
-            inputs: 
+            inputs:
                 scriptType: filePath
                 scriptName: ./build.ps1
                 arguments: ""
@@ -154,11 +158,11 @@ mod tests {
             timeoutInMinutes: 0
             condition: succeeded()
             refName: PowerShell1
-            task: 
+            task:
                 id: "e213ff0f-5d5c-4791-802d-52ea3e7be1f1"
                 versionSpec: "1.*"
                 definitionType: task
-            inputs: 
+            inputs:
                 scriptType: filePath
                 scriptName: ./build.ps1
                 arguments: ""
