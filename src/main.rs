@@ -15,8 +15,9 @@ arg_enum!{
 }
 
 fn main() {
+    let version = format!("{}.{}", env!("CARGO_PKG_VERSION"), env!("BUILD_BUILDID"));
     let matches = App::new("J 2 Y")
-        .version("0.0.2")
+        .version(&*version)
         .author("Steven Murawski <steven.murawski@microsoft.com>")
         .about("Converts JSON between YAML")
         .arg(

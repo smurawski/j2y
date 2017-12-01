@@ -1,7 +1,16 @@
 ---
 
+
 phases:
+  - phase: Set_Build_Number
+    queue: 
+      demands: agent.os -equals Windows_NT
+    steps:
+      -
+        powershell: |
+          Write-Host "##vso[build.updatebuildnumber]v0.0.2.$env:BUILD_BUILDID"
   - phase: Windows
+    dependsOn: Set_Build_Number
     queue: 
       demands: agent.os -equals Windows_NT
       parallel: '$[ true ]'
@@ -40,13 +49,14 @@ phases:
         task: PublishBuildArtifacts@1
         displayName: "Publish Artifact: Release Build"
         inputs:
-          PathtoPublish: ./target/release/
+          PathtoPublish: ./target/release/j2y.exe
           ArtifactName: drop
           ArtifactType: Container
           TargetPath: "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
           Parallel: "false"
           ParallelCount: "8"
   - phase: Linux
+    dependsOn: Set_Build_Number
     queue: 
       demands: agent.os -equals Linux
       parallel: '$[ true ]'
@@ -72,16 +82,22 @@ phases:
         inputs:
           scriptPath: ./ci/linux/build.sh
       -
+        task: ShellScript@2
+        displayName: Rename Executable
+        inputs:
+          scriptPath: ./ci/linux/move.sh
+      -
         task: PublishBuildArtifacts@1
         displayName: "Publish Artifact: Release Build"
         inputs:
-          PathtoPublish: ./target/release/
+          PathtoPublish: ./target/release/j2y-linux
           ArtifactName: drop
           ArtifactType: Container
           TargetPath: "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
           Parallel: "false"
           ParallelCount: "8"
   - phase: Mac
+    dependsOn: Set_Build_Number
     queue: 
       demands: agent.os -equals Darwin
       parallel: '$[ true ]'
@@ -107,10 +123,15 @@ phases:
         inputs:
           scriptPath: ./ci/mac/build.sh
       -
+        task: ShellScript@2
+        displayName: Rename Executable
+        inputs:
+          scriptPath: ./ci/mac/move.sh
+      -
         task: PublishBuildArtifacts@1
         displayName: "Publish Artifact: Release Build"
         inputs:
-          PathtoPublish: ./target/release/
+          PathtoPublish: ./target/release/j2y-darwin
           ArtifactName: drop
           ArtifactType: Container
           TargetPath: "\\\\my\\share\\$(Build.DefinitionName)\\$(Build.BuildNumber)"
