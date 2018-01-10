@@ -85,7 +85,7 @@ phases:
           ParallelCount: "8"
   - phase: Mac
     dependsOn: Linux
-    queue: Hosted Mac Preview
+    queue: Hosted MacOS Preview
     steps:
       -
         task: ShellScript@2
