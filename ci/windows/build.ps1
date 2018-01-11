@@ -17,11 +17,14 @@ function Test-RustFmt {
 
 
 function Get-CargoCommand {
+    param ([switch]$Nightly)
+    $Branch = 'stable'
+    if ($Nightly) {$Branch = 'nightly'}
     if (Test-RustUp) {
-        'cargo +stable-x86_64-pc-windows-msvc '
+        "cargo +$branch-x86_64-pc-windows-msvc "
     }
     else {
-        "$env:USERPROFILE/.cargo/bin/cargo.exe +stable-x86_64-pc-windows-msvc "
+        "$env:USERPROFILE/.cargo/bin/cargo.exe +$branch-x86_64-pc-windows-msvc "
     }
 }
 function Invoke-Build([string]$Path, [switch]$Clean, [switch]$Release, [switch]$Check) {
@@ -62,15 +65,18 @@ function New-PathString([string]$StartingPath, [string]$Path) {
 }
 
 function Assert-Rust {
-    Write-Host "Validating Rust (stable-x86_64-pc-windows-msvc) is installed and up to date."
+    param ([switch]$Nightly)
+    $Branch = 'stable'
+    if ($Nightly) {$Branch = 'nightly'}
+    Write-Host "Validating Rust ($branch-x86_64-pc-windows-msvc) is installed and up to date."
     if (-not (Test-RustUp)) {
-        Write-Host "Installing rustup and stable-x86_64-pc-windows-msvc Rust."
+        Write-Host "Installing rustup and $branch-x86_64-pc-windows-msvc Rust."
         invoke-restmethod -usebasicparsing 'https://static.rust-lang.org/rustup/dist/i686-pc-windows-gnu/rustup-init.exe' -outfile 'rustup-init.exe'
         ./rustup-init.exe -y --default-toolchain stable-x86_64-pc-windows-msvc --no-modify-path
     }
-    else {
-        rustup install stable-x86_64-pc-windows-msvc
-    }
+    
+    invoke-expression "rustup install $branch-x86_64-pc-windows-msvc"
+    
 }
 
 
@@ -78,15 +84,15 @@ Write-Host "Making sure ~/.cargo/bin is on PATH"
 $env:PATH = New-PathString -StartingPath "$env:PATH" -Path "$env:USERPROFILE\.cargo\bin"
 
 if ($Format) {
-    Assert-Rust    
-    $cargo = Get-CargoCommand
+    $cargo = Get-CargoCommand -nightly
 
     if (-not (Test-RustFmt)) {
+        Assert-Rust -nightly        
         Write-Host "Installing rustfmt"
-        Invoke-Expression "$cargo install rustfmt"
+        Invoke-Expression "$cargo install rustfmt-nightly"
     }
     Write-Host "$cargo fmt -- --write-mode diff"
-    invoke-expression "$cargo fmt -- --write-mode diff"
+    invoke-expression "$cargo fmt -- --write-mode diff --verbose"
 }
 
 if ($Test) {
