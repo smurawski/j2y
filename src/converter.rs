@@ -1,5 +1,5 @@
-extern crate serde_yaml;
 extern crate serde_json;
+extern crate serde_yaml;
 
 use std::io::prelude::*;
 use std::io;
@@ -20,7 +20,6 @@ pub fn read_json_content(file_path: &str, verbose: bool) -> Result<String, io::E
 }
 
 pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, serde_json::Error> {
-
     // Parse the string of json data into serde_yaml::Value.
     let v: serde_yaml::Value = serde_json::from_str(json_str)?;
     let yaml_string = serde_yaml::to_string(&v).expect("Failed to convert the YAML to a string.");
@@ -34,7 +33,6 @@ pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, ser
 }
 
 pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, serde_yaml::Error> {
-
     // Parse the string of json data into serde_yaml::Value.
     let v: serde_json::Value = serde_yaml::from_str(yaml_str)?;
     let json_string = serde_json::to_string(&v).expect("Failed to convert the JSON to a string.");
