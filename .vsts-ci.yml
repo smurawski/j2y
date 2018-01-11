@@ -4,39 +4,33 @@ phases:
   - phase: Windows
     queue: Hosted VS2017
     steps:
-      -
-        displayName: Label Build
-        powershell: |
+      - powershell: |
           Write-Host "##vso[build.updatebuildnumber]v0.0.2.$env:BUILD_BUILDID"
+        displayName: Label Build
 
-      -
-        displayName: Install Rust
-        powershell: |
+      - powershell: |
           invoke-restmethod -usebasicparsing 'https://static.rust-lang.org/rustup/dist/i686-pc-windows-gnu/rustup-init.exe' -outfile 'rustup-init.exe'
           ./rustup-init.exe -y --default-toolchain stable-x86_64-pc-windows-msvc --no-modify-path
           $env:USERPROFILE/.cargo/bin/rustup.exe install nightly-x86_64-pc-windows-msvc
           remove-item rustup-init.exe
+        displayName: Install Rust
 
-      -
-        displayName: Validate Formatting
-        powershell: |
+      - powershell: |
           $env:USERPROFILE/.cargo/bin/cargo.exe +nightly-x86_64-pc-windows-msvc install rustfmt-nightly --force
           $env:USERPROFILE/.cargo/bin/cargo.exe +nightly-x86_64-pc-windows-msvc fmt -- --write-mode diff
+        displayName: Validate Formatting
 
-      -
-        displayName: Cargo Check
-        powershell: |
+      - powershell: |
           $env:USERPROFILE/.cargo/bin/cargo.exe +stable-x86_64-pc-windows-msvc check
+        displayName: Cargo Check
 
-      -
-        displayName: Run Tests
-        powershell: |
+      - powershell: |
           $env:USERPROFILE/.cargo/bin/cargo.exe +stable-x86_64-pc-windows-msvc test
+        displayName: Run Tests
 
-      -
-        displayName: Build Release
-        powershell: |
+      - powershell: |
           $env:USERPROFILE/.cargo/bin/cargo.exe +stable-x86_64-pc-windows-msvc build --release
+        displayName: Build Release
 
       -
         task: PublishBuildArtifacts@1
@@ -53,9 +47,7 @@ phases:
     dependsOn: Windows
     queue: Hosted Linux Preview
     steps:
-      -
-        displayName: Install Rust
-        script: |
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           if command -v rustup >/dev/null; then
             rustup install stable-x86_64-unknown-linux-gnu
@@ -63,36 +55,33 @@ phases:
               curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable-x86_64-unknown-linux-gnu -y
           fi
           rustup install nightly-x86_64-unknown-linux-gnu
-      -
+        displayName: Install Rust
+
+      - script: |
+          export PATH="~/.cargo/bin:$PATH"
+          cargo +nightly-x86_64-unknown-linux-gnu install rustfmt-nightly --force
+          cargo +nightly-x86_64-unknown-linux-gnu fmt -- --write-mode diff
         displayName: Validate Formatting
-        script: |
+
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           cargo +nightly-x86_64-unknown-linux-gnu install rustfmt-nightly --force
           cargo +nightly-x86_64-unknown-linux-gnu fmt -- --write-mode diff
-
-      -
         displayName: Cargo Check
-        script: |
-          export PATH="~/.cargo/bin:$PATH"
-          cargo +nightly-x86_64-unknown-linux-gnu install rustfmt-nightly --force
-          cargo +nightly-x86_64-unknown-linux-gnu fmt -- --write-mode diff
 
-      -
-        displayName: Run Tests
-        script: |
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           cargo +nightly-x86_64-unknown-linux-gnu test
+        displayName: Run Tests
 
-      -
-        displayName: Build Release
-        script: |
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           cargo +nightly-x86_64-unknown-linux-gnu build --release
+        displayName: Build Release
 
-      -
-        displayName: Rename Executable
-        script: |
+      - script: |
           mv ../../target/release/j2y ../../target/release/j2y-linux
+        displayName: Rename Executable
 
       -
         task: PublishBuildArtifacts@1
@@ -109,9 +98,7 @@ phases:
     dependsOn: Linux
     queue: Hosted MacOS Preview
     steps:
-      -
-        displayName: Install Rust
-        script: |
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           if command -v rustup >/dev/null; then
             rustup install stable-x86_64-apple-darwin
@@ -119,36 +106,33 @@ phases:
               curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable-x86_64-apple-darwin -y
           fi
           rustup install nightly-x86_64-apple-darwin
-      -
+        displayName: Install Rust
+
+      - script: |
+          export PATH="~/.cargo/bin:$PATH"
+          cargo +nightly-x86_64-apple-darwin install rustfmt-nightly --force
+          cargo +nightly-x86_64-apple-darwin fmt -- --write-mode diff
         displayName: Validate Formatting
-        script: |
+
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           cargo +nightly-x86_64-apple-darwin install rustfmt-nightly --force
           cargo +nightly-x86_64-apple-darwin fmt -- --write-mode diff
-
-      -
         displayName: Cargo Check
-        script: |
-          export PATH="~/.cargo/bin:$PATH"
-          cargo +nightly-x86_64-apple-darwin install rustfmt-nightly --force
-          cargo +nightly-x86_64-apple-darwin fmt -- --write-mode diff
 
-      -
-        displayName: Run Tests
-        script: |
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           cargo +nightly-x86_64-apple-darwin test
+        displayName: Run Tests
 
-      -
-        displayName: Build Release
-        script: |
+      - script: |
           export PATH="~/.cargo/bin:$PATH"
           cargo +nightly-x86_64-apple-darwin build --release
+        displayName: Build Release
 
-      -
-        displayName: Rename Executable
-        script: |
+      - script: |
           mv ../../target/release/j2y ../../target/release/j2y-darwin
+        displayName: Rename Executable
 
       -
         task: PublishBuildArtifacts@1
