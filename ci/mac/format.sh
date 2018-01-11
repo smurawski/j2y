@@ -4,9 +4,9 @@ set -eu
 export PATH="~/.cargo/bin:$PATH"
 
 if command -v rustfmt >/dev/null; then
-    rustup run stable-x86_64-apple-darwin  rustfmt --version
+    rustup run nightly-x86_64-apple-darwin rustfmt --version
 else
-    cargo +stable-x86_64-apple-darwin  install rustfmt --force
+    cargo +nightly-x86_64-apple-darwin  install rustfmt-nightly --force
 fi
 
 cargo +stable-x86_64-apple-darwin  fmt -- --write-mode diff

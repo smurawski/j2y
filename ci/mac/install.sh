@@ -9,3 +9,4 @@ else
     curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable-x86_64-apple-darwin  -y
 fi
 
+rustup install nightly-x86_64-apple-darwin
