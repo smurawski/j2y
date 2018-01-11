@@ -100,7 +100,7 @@ if ($Format) {
     if (-not (Test-RustFmt)) {
         Assert-Rust -nightly        
         Write-Host "Installing rustfmt"
-        Invoke-Expression "$cargo install rustfmt-nightly"
+        Invoke-Expression "$cargo install rustfmt-nightly --force"
     }
     Write-Host "$cargo fmt -- --write-mode diff"
     invoke-expression "$cargo fmt -- --write-mode diff --verbose"
