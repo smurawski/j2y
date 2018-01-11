@@ -27,6 +27,16 @@ function Get-CargoCommand {
         "$env:USERPROFILE/.cargo/bin/cargo.exe +$branch-x86_64-pc-windows-msvc "
     }
 }
+
+function Get-RustupCommand {
+    if (Test-RustUp) {
+        "rustup.exe "
+    }
+    else {
+        "$env:USERPROFILE/.cargo/bin/rustup.exe "
+    }
+}
+
 function Invoke-Build([string]$Path, [switch]$Clean, [switch]$Release, [switch]$Check) {
     $Path = Resolve-Path $Path
 
@@ -75,7 +85,8 @@ function Assert-Rust {
         ./rustup-init.exe -y --default-toolchain stable-x86_64-pc-windows-msvc --no-modify-path
     }
     
-    invoke-expression "rustup install $branch-x86_64-pc-windows-msvc"
+    $rustup = Get-RustupCommand
+    invoke-expression "$rustup install $branch-x86_64-pc-windows-msvc"
     
 }
 
