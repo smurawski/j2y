@@ -80,7 +80,7 @@ phases:
         displayName: Build Release
 
       - script: |
-          mv ../../target/release/j2y ../../target/release/j2y-linux
+          mv ./target/release/j2y ./target/release/j2y-linux
         displayName: Rename Executable
 
       -
@@ -131,7 +131,7 @@ phases:
         displayName: Build Release
 
       - script: |
-          mv ../../target/release/j2y ../../target/release/j2y-darwin
+          mv ./target/release/j2y ./target/release/j2y-darwin
         displayName: Rename Executable
 
       -
