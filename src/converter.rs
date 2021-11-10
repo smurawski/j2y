@@ -1,27 +1,11 @@
-extern crate serde_json;
-extern crate serde_yaml;
+use crate::converter::error::ConversionError;
 
-use std::io::prelude::*;
-use std::io;
-use std::fs::File;
-
-pub fn read_json_content(file_path: &str, verbose: bool) -> Result<String, io::Error> {
-    if verbose {
-        println!("Reading: {} \n", file_path);
-    }
-    let mut file = File::open(file_path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    if verbose {
-        println!("Read content: \n");
-        println!("{}", &contents);
-    }
-    Ok(contents)
-}
-
-pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, serde_json::Error> {
+pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, ConversionError> {
     // Parse the string of json data into serde_yaml::Value.
-    let v: serde_yaml::Value = serde_json::from_str(json_str)?;
+    let v: serde_yaml::Value = match serde_json::from_str(json_str) {
+        Ok(v) => v,
+        Err(_) => return Err(ConversionError),
+    };
     let yaml_string = serde_yaml::to_string(&v).expect("Failed to convert the YAML to a string.");
 
     if verbose {
@@ -32,9 +16,12 @@ pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, ser
     Ok(yaml_string)
 }
 
-pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, serde_yaml::Error> {
+pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, ConversionError> {
     // Parse the string of json data into serde_yaml::Value.
-    let v: serde_json::Value = serde_yaml::from_str(yaml_str)?;
+    let v: serde_json::Value = match serde_yaml::from_str(yaml_str) {
+        Ok(serde_value) => serde_value,
+        Err(_) => return Err(ConversionError),
+    };
     let json_string = serde_json::to_string(&v).expect("Failed to convert the JSON to a string.");
 
     if verbose {
@@ -45,16 +32,28 @@ pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, ser
     Ok(json_string)
 }
 
-pub fn write_yaml_content(
-    file_path: &str,
-    output_content: String,
-    verbose: bool,
-) -> io::Result<()> {
-    if verbose {
-        println!("\nWriting: {} \n", file_path);
+pub mod error {
+    use std::fmt;
+
+    pub struct ConversionError;
+
+    impl fmt::Display for ConversionError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "Failed to convert the source content to destination content."
+            )
+        }
     }
-    let mut file = File::create(file_path).expect("Failed to create the output file.");
-    file.write_all(output_content.into_bytes().as_ref())
+
+    impl fmt::Debug for ConversionError {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(
+                f,
+                "Failed to convert the source content to destination content."
+            )
+        }
+    }
 }
 
 #[cfg(test)]
