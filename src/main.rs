@@ -15,8 +15,14 @@ arg_enum! {
 }
 
 fn main() {
-    let (verbose, input_file, output_file, source_format) = get_cli_args();
-       
+    let (verbose, input_file, output_file, source_format) = 
+        if cfg!(target_family = "wasm"){
+            (true, String::new(), String::new(), SourceFormat::YAML)
+        }
+        else {
+            get_cli_args()
+        };
+
     let contents = read_content(&input_file, verbose)
         .expect("Unable to read the file");
     let output_content =
