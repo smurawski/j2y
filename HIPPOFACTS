@@ -1,0 +1,8 @@
+[bindle]
+name = "stevenmurawski/j2y"
+version = "0.1.0"
+authors = ["Steven Murawski"]
+
+[[handler]]
+route = "/"
+name = "target/wasm32-wasi/release/j2y.wasm"
