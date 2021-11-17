@@ -1,8 +1,8 @@
+use crate::SourceFormat;
 use clap::{App, Arg};
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use crate::SourceFormat;
 
 pub fn get_cli_args() -> (bool, String, String, SourceFormat) {
     let version = format!(
@@ -62,16 +62,17 @@ pub fn write_content(file_path: &str, output_content: String, verbose: bool) -> 
     file.write_all(output_content.into_bytes().as_ref())
 }
 
-pub fn read_content(file_path: &str, verbose: bool) -> Result<String, io::Error> {
+pub fn read_content(file_path: &str, verbose: bool) -> String {
     if verbose {
         println!("Reading: {} \n", file_path);
     }
-    let mut file = File::open(file_path)?;
+    let mut file = File::open(file_path).expect("Failed to open the target file.");
     let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
+    file.read_to_string(&mut contents)
+        .expect("Unable to read the file");
     if verbose {
         println!("Read content: \n");
         println!("{}", &contents);
     }
-    Ok(contents)
+    contents
 }

@@ -1,5 +1,6 @@
 use crate::SourceFormat;
 use std::env;
+use std::io::{stdin, Read};
 
 pub fn get_wasm_args() -> (bool, String, String, SourceFormat) {
     // we'll default to verbose being false as it writes stdout,
@@ -22,4 +23,12 @@ fn get_source_format(input_content_type: &str) -> SourceFormat {
         "application/yml" => SourceFormat::YAML,
         _ => panic!("Unexpected Content Header."),
     }
+}
+
+pub fn read_wagi_content() -> String {
+    let mut input_content = String::new();
+    stdin()
+        .read_to_string(&mut input_content)
+        .expect("Failed to read from standard in.");
+    input_content
 }
