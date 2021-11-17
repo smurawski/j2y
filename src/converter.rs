@@ -1,10 +1,57 @@
 extern crate serde_json;
 extern crate serde_yaml;
 
-pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, serde_json::Error> {
+use std::fmt;
+
+pub struct Error {
+    pub message: String,
+    pub detail: String,
+    pub status_code: usize,
+    pub source_content: String,
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\n{}\nReturn Status Code: {}\nSource Content: \n{}",
+            self.message, self.detail, self.status_code, self.source_content
+        )
+    }
+}
+
+pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, Error> {
     // Parse the string of json data into serde_yaml::Value.
-    let v: serde_yaml::Value = serde_json::from_str(json_str)?;
-    let yaml_string = serde_yaml::to_string(&v).expect("Failed to convert the YAML to a string.");
+    let v: serde_yaml::Value = match serde_json::from_str(json_str) {
+        Ok(v) => v,
+        Err(e) => {
+            let wrapped_error = Error {
+                message: "Failed to read the content as JSON.".to_string(),
+                detail: format!("{:?}", e),
+                status_code: 406,
+                source_content: json_str.to_string(),
+            };
+            return Err(wrapped_error);
+        }
+    };
+    let yaml_string = match serde_yaml::to_string(&v) {
+        Ok(v) => v,
+        Err(e) => {
+            let wrapped_error = Error {
+                message: "Failed to convert the JSON content into YAML.".to_string(),
+                detail: format!("{:?}", e),
+                status_code: 500,
+                source_content: json_str.to_string(),
+            };
+            return Err(wrapped_error);
+        }
+    };
 
     if verbose {
         println!("\nAfter YAML conversion: \n");
@@ -14,10 +61,32 @@ pub fn convert_json_to_yaml(json_str: &str, verbose: bool) -> Result<String, ser
     Ok(yaml_string)
 }
 
-pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, serde_yaml::Error> {
+pub fn convert_yaml_to_json(yaml_str: &str, verbose: bool) -> Result<String, Error> {
     // Parse the string of json data into serde_yaml::Value.
-    let v: serde_json::Value = serde_yaml::from_str(yaml_str)?;
-    let json_string = serde_json::to_string(&v).expect("Failed to convert the JSON to a string.");
+    let v: serde_json::Value = match serde_yaml::from_str(yaml_str) {
+        Ok(v) => v,
+        Err(e) => {
+            let wrapped_error = Error {
+                message: "Failed to read the content as YAML.".to_string(),
+                detail: format!("{:?}", e),
+                status_code: 406,
+                source_content: yaml_str.to_string()
+            };
+            return Err(wrapped_error);
+        }
+    };
+    let json_string = match serde_json::to_string(&v) {
+        Ok(v) => v,
+        Err(e) => {
+            let wrapped_error = Error {
+                message: "Failed to convert the YAML content into JSON.".to_string(),
+                detail: format!("{:?}", e),
+                status_code: 500,
+                source_content: yaml_str.to_string()
+            };
+            return Err(wrapped_error);
+        }
+    };
 
     if verbose {
         println!("\nAfter YAML conversion: \n");
