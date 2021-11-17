@@ -2,9 +2,11 @@
 extern crate clap;
 mod cli;
 mod converter;
+mod wasm;
 
 use cli::{get_cli_args, read_content, write_content};
 use converter::{convert_json_to_yaml, convert_yaml_to_json};
+use wasm::{get_wasm_args};
 
 arg_enum! {
     #[derive(Debug)]
@@ -17,7 +19,7 @@ arg_enum! {
 fn main() {
     let (verbose, input_file, output_file, source_format) = 
         if cfg!(target_family = "wasm"){
-            (true, String::new(), String::new(), SourceFormat::YAML)
+            get_wasm_args()
         }
         else {
             get_cli_args()
