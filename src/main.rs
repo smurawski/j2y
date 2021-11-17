@@ -6,7 +6,7 @@ mod wasm;
 
 use cli::{get_cli_args, read_content, write_content};
 use converter::{convert_json_to_yaml, convert_yaml_to_json};
-use wasm::{get_wasm_args, read_wagi_content};
+use wasm::{get_wasm_args, read_wagi_content, write_wagi_output};
 
 arg_enum! {
     #[derive(Debug)]
@@ -37,5 +37,10 @@ fn main() {
                 .expect("Unable to convert the json to yaml."),
         };
 
-    write_content(&output_file, output_content, verbose).expect("Failed to write the output file");
+    if cfg!(target_family = "wasm") {
+        write_wagi_output(&output_content, &source_format);
+    }
+    else {
+        write_content(&output_file, output_content, verbose).expect("Failed to write the output file");
+    }
 }

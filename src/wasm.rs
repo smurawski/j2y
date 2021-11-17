@@ -25,10 +25,23 @@ fn get_source_format(input_content_type: &str) -> SourceFormat {
     }
 }
 
+fn get_output_format(source_format: &SourceFormat) -> String {
+    match source_format {
+        SourceFormat::JSON => String::from("application/yaml"),
+        SourceFormat::YAML => String::from("application/json"),
+    }
+}
+
 pub fn read_wagi_content() -> String {
     let mut input_content = String::new();
     stdin()
         .read_to_string(&mut input_content)
         .expect("Failed to read from standard in.");
     input_content
+}
+
+pub fn write_wagi_output(output: &str, source_format: &SourceFormat) {
+    println!("Content-Type: {}", get_output_format(source_format));
+    println!();
+    println!("{}", output);
 }
