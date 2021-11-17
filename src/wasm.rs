@@ -1,4 +1,5 @@
 use crate::SourceFormat;
+use crate::converter::Error;
 use std::env;
 use std::io::{stdin, Read};
 
@@ -40,8 +41,20 @@ pub fn read_wagi_content() -> String {
     input_content
 }
 
-pub fn write_wagi_output(output: &str, source_format: &SourceFormat) {
-    println!("Content-Type: {}", get_output_format(source_format));
+pub fn write_wagi_output(output_result: Result<String, Error>, source_format: &SourceFormat) {
+    let mut content_type = get_output_format(source_format);
+    let mut status = 200;
+    let output = match output_result {
+        Ok(output) => output,
+        Err(e) => {
+            content_type = "text/plain".to_string();
+            status = e.status_code;
+            format!("{:?}", e)
+        }
+    };
+    
+    println!("Content-Type: {}", content_type );
+    println!("Status: {}", status);
     println!();
     println!("{}", output);
 }

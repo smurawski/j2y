@@ -1,4 +1,5 @@
 use crate::SourceFormat;
+use crate::converter::Error;
 use clap::{App, Arg};
 use std::fs::File;
 use std::io;
@@ -54,10 +55,11 @@ pub fn get_cli_args() -> (bool, String, String, SourceFormat) {
     )
 }
 
-pub fn write_content(file_path: &str, output_content: String, verbose: bool) -> io::Result<()> {
+pub fn write_content(file_path: &str, output_result: Result<String, Error>, verbose: bool) -> io::Result<()> {
     if verbose {
         println!("\nWriting: {} \n", file_path);
     }
+    let output_content = output_result.unwrap();
     let mut file = File::create(file_path).expect("Failed to create the output file.");
     file.write_all(output_content.into_bytes().as_ref())
 }

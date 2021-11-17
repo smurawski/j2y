@@ -31,14 +31,12 @@ fn main() {
 
     let output_content =
         match source_format {
-            SourceFormat::YAML => convert_yaml_to_json(&contents, verbose)
-                .expect("Unable to convert the yaml to json."),
-            SourceFormat::JSON => convert_json_to_yaml(&contents, verbose)
-                .expect("Unable to convert the json to yaml."),
+            SourceFormat::YAML => convert_yaml_to_json(&contents, verbose),
+            SourceFormat::JSON => convert_json_to_yaml(&contents, verbose),
         };
 
     if cfg!(target_family = "wasm") {
-        write_wagi_output(&output_content, &source_format);
+        write_wagi_output(output_content, &source_format);
     }
     else {
         write_content(&output_file, output_content, verbose).expect("Failed to write the output file");
